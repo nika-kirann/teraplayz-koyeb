@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+<div class="container page">
+  <div class="empty error-page">
+    <div class="error-code"><%= status %></div>
+    <h1><%= title %></h1>
+    <p class="muted"><%= message %></p>
+    <div class="hero-cta center"><a class="btn btn-glow" href="/">Back to home</a><a class="btn btn-ghost" href="/browse">Browse videos</a></div>
+  </div>
+</div>
+<%- include('../partials/foot') %>

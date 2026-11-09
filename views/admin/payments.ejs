@@ -1,0 +1,14 @@
+<%- include('../partials/admin-top') %>
+<header class="admin-head"><div><h1>Payments</h1><p class="muted">Telegram Stars payments verified from successful_payment webhook updates. Charge ids are unique (replay-safe).</p></div></header>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Date (UTC)</th><th>User</th><th>Telegram user</th><th>Amount</th><th>Period</th><th>Charge id</th></tr></thead>
+  <tbody>
+  <% items.forEach(function (p) { %>
+    <tr><td><%= new Date(Number(p.created_at)).toISOString().replace('T', ' ').slice(0, 16) %></td><td><%= p.username || '— unmatched —' %></td><td><%= p.telegram_user_id %></td><td><%= p.amount %> ⭐</td><td><%= h.formatDate(p.period_start) %> → <%= h.formatDate(p.period_end) %></td><td><code class="small"><%= p.telegram_payment_charge_id %></code></td></tr>
+  <% }) %>
+  <% if (!items.length) { %><tr><td colspan="6" class="empty-cell">No payments yet.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+<%- include('../partials/admin-bottom') %>

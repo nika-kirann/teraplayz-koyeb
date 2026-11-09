@@ -1,0 +1,12 @@
+<% if (adsEnabled && ads && ads[slot] && ads[slot].length) { %>
+  <aside class="ad-slot ad-<%= slot %>" aria-label="Advertisement">
+    <span class="ad-label">Advertisement · <a href="/premium">Go ad-free</a></span>
+    <% ads[slot].forEach(function (a) { %>
+      <% if (a.kind === 'image') { %>
+        <a class="ad-creative" href="<%= a.link_url || '/premium' %>" <% if (/^https?:/.test(a.link_url || '')) { %>target="_blank" rel="noopener sponsored"<% } %>><img src="<%= a.image_url %>" alt="<%= a.name %>" loading="lazy" decoding="async"></a>
+      <% } else { %>
+        <iframe class="ad-frame" src="/ads/frame/<%= a.id %>" title="<%= a.name %>" loading="lazy" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation" referrerpolicy="no-referrer"></iframe>
+      <% } %>
+    <% }) %>
+  </aside>
+<% } %>

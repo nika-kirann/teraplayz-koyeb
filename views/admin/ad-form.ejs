@@ -1,0 +1,27 @@
+<%- include('../partials/admin-top') %>
+<% var e = errors || {}; %>
+<header class="admin-head"><div><h1><%= ad.id ? 'Edit ad' : 'New ad' %></h1><p class="muted">HTML snippets run inside a sandboxed, isolated iframe so they cannot read cookies or touch the player.</p></div></header>
+<% if (Object.keys(e).length) { %><div class="alert alert-error"><% Object.keys(e).forEach(function (k) { %>• <%= e[k] %><br><% }) %></div><% } %>
+<form class="form panel narrow-form" method="post" action="/admin/ads<%= ad.id ? '/' + ad.id : '' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <label class="field<%= e.name ? ' has-error' : '' %>"><span>Name</span><input name="name" value="<%= ad.name || '' %>" required maxlength="80"></label>
+  <div class="field-row">
+    <label class="field<%= e.slot ? ' has-error' : '' %>"><span>Placement</span><select name="slot"><% slots.forEach(function (s) { %><option <%= ad.slot === s ? 'selected' : '' %>><%= s %></option><% }) %></select></label>
+    <label class="field<%= e.pages ? ' has-error' : '' %>"><span>Pages</span><select name="pages"><% pages.forEach(function (p) { %><option <%= ad.pages === p ? 'selected' : '' %>><%= p %></option><% }) %></select></label>
+    <label class="field"><span>Order</span><input name="sort_order" value="<%= ad.sort_order || 0 %>" inputmode="numeric"></label>
+  </div>
+  <div class="seg" role="radiogroup" aria-label="Ad type">
+    <label><input type="radio" name="kind" value="image" <%= ad.kind !== 'html' ? 'checked' : '' %>><span>Image + link</span></label>
+    <label><input type="radio" name="kind" value="html" <%= ad.kind === 'html' ? 'checked' : '' %>><span>HTML snippet</span></label>
+  </div>
+  <div data-kind="image" <%= ad.kind === 'html' ? 'hidden' : '' %>>
+    <label class="field<%= e.image_url ? ' has-error' : '' %>"><span>Image URL</span><input name="image_url" value="<%= ad.image_url || '' %>" placeholder="https://… or /img/ads/…"></label>
+    <label class="field<%= e.link_url ? ' has-error' : '' %>"><span>Click-through URL</span><input name="link_url" value="<%= ad.link_url || '' %>" placeholder="https://…"></label>
+  </div>
+  <div data-kind="html" <%= ad.kind === 'html' ? '' : 'hidden' %>>
+    <label class="field<%= e.html ? ' has-error' : '' %>"><span>HTML snippet</span><textarea name="html" rows="8" spellcheck="false"><%= ad.html || '' %></textarea></label>
+  </div>
+  <label class="switch"><input type="checkbox" name="enabled" value="1" <%= ad.enabled ? 'checked' : '' %>><span></span>Enabled</label>
+  <div class="form-actions"><button class="btn btn-glow">Save ad</button><a class="btn btn-ghost" href="/admin/ads">Cancel</a></div>
+</form>
+<%- include('../partials/admin-bottom') %>

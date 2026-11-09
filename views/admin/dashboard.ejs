@@ -1,0 +1,41 @@
+<%- include('../partials/admin-top') %>
+<header class="admin-head">
+  <div><h1>Dashboard</h1><p class="muted">Overview of TERAPLAYZ at <%= new Date().toUTCString().slice(5, 22) %> UTC</p></div>
+  <div class="admin-head-actions">
+    <form method="post" action="/admin/cache/clear"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-sm">Clear cache</button></form>
+    <a class="btn btn-glow btn-sm" href="/admin/videos/new">+ Add video</a>
+  </div>
+</header>
+<% warnings.forEach(function (w) { %><div class="alert alert-warn"><%= w %></div><% }) %>
+<div class="stats">
+  <div class="stat"><span>Total users</span><strong data-stat="users"><%= s.users %></strong><small>+<%= s.signups7 %> this week</small></div>
+  <div class="stat stat-hot"><span>Premium members</span><strong data-stat="premium"><%= s.premium %></strong><small><%= s.users ? Math.round(s.premium / s.users * 100) : 0 %>% of users</small></div>
+  <div class="stat"><span>Videos</span><strong data-stat="videos"><%= s.videos %></strong><small><%= s.published %> published · <%= s.premiumVideos %> premium</small></div>
+  <div class="stat"><span>Total views</span><strong data-stat="views"><%= h.formatCount(s.views) %></strong><small>all time</small></div>
+  <div class="stat"><span>Stars earned</span><strong data-stat="stars"><%= s.stars %> ⭐</strong><small><%= s.payments %> payments</small></div>
+</div>
+<div class="admin-cols">
+  <section class="panel">
+    <h2>Last 14 days</h2>
+    <% var max = Math.max.apply(null, s.series.map(function (d) { return Number(d.views); }).concat([1])); %>
+    <div class="chart" role="img" aria-label="Daily views for the last 14 days">
+      <% s.series.forEach(function (d) { %>
+        <div class="bar" title="<%= d.day %>: <%= d.views %> views, <%= d.signups %> signups, <%= d.payments %> payments"><i style="height:<%= Math.max(2, Math.round(Number(d.views) / max * 100)) %>%"></i><span><%= d.day.slice(8) %></span></div>
+      <% }) %>
+    </div>
+    <p class="muted small">Bars = daily views. Hover for signups and payments.</p>
+  </section>
+  <section class="panel">
+    <h2>Top videos</h2>
+    <ul class="list">
+      <% s.topVideos.forEach(function (v) { %><li><a href="/admin/videos/<%= v.id %>/edit"><%= v.title %></a><span class="muted"><%= h.formatCount(v.views) %> views<%= v.is_premium ? ' · Premium' : '' %><%= v.is_published ? '' : ' · Draft' %></span></li><% }) %>
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Recent signups</h2>
+    <ul class="list">
+      <% s.recentUsers.forEach(function (u) { %><li><span><%= u.username %><% if (u.role === 'admin') { %> <span class="pill">admin</span><% } %><% if (u.premium_until && Number(u.premium_until) > Date.now()) { %> <span class="pill pill-premium">premium</span><% } %></span><span class="muted"><%= h.timeAgo(u.created_at) %></span></li><% }) %>
+    </ul>
+  </section>
+</div>
+<%- include('../partials/admin-bottom') %>

@@ -1,0 +1,32 @@
+{
+  "name": "teraplayz",
+  "version": "1.0.0",
+  "description": "TERAPLAYZ — premium dark streaming platform backed by a private Telegram channel video library and Telegram Stars memberships.",
+  "main": "server.js",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed.js",
+    "telegram:webhook": "node scripts/set-webhook.js",
+    "telegram:webhook:info": "node scripts/set-webhook.js --info",
+    "telegram:webhook:delete": "node scripts/set-webhook.js --delete",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "compression": "^1.8.2",
+    "ejs": "^7.0.2",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.3",
+    "helmet": "^8.3.0",
+    "multer": "^2.5.0",
+    "pg": "^8.23.1",
+    "sharp": "^0.35.5"
+  }
+}

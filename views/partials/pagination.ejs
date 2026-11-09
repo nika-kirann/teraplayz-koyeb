@@ -1,0 +1,10 @@
+<% if (pages > 1) { %>
+<nav class="pager" aria-label="Pagination">
+  <% var mk = function (p) { var u = new URLSearchParams(base); u.set('page', p); return '?' + u.toString(); }; %>
+  <% if (page > 1) { %><a class="pager-btn" href="<%= mk(page - 1) %>" rel="prev">‹ Prev</a><% } %>
+  <% for (var p = Math.max(1, page - 2); p <= Math.min(pages, page + 2); p++) { %>
+    <a class="pager-num<%= p === page ? ' current' : '' %>" href="<%= mk(p) %>" <%= p === page ? 'aria-current=page' : '' %>><%= p %></a>
+  <% } %>
+  <% if (page < pages) { %><a class="pager-btn" href="<%= mk(page + 1) %>" rel="next">Next ›</a><% } %>
+</nav>
+<% } %>

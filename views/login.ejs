@@ -1,0 +1,18 @@
+<%- include('partials/head', { bodyClass: 'page-auth' }) %>
+<div class="auth">
+  <div class="auth-card">
+    <%- include('partials/logo', { lid: 'a' }) %>
+    <h1>Welcome back</h1>
+    <p class="muted">Sign in to continue watching, sync your progress and manage Premium.</p>
+    <% if (errors.form) { %><div class="alert alert-error" role="alert"><%= errors.form %></div><% } %>
+    <form method="post" action="/login" class="form" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="next" value="<%= next %>">
+      <label class="field"><span>Username</span><input name="username" autocomplete="username" required minlength="3" maxlength="24" value="<%= form.username || '' %>" autofocus></label>
+      <label class="field"><span>Password</span><input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
+      <button class="btn btn-glow btn-block" type="submit">Sign in</button>
+    </form>
+    <% if (cfg.allowRegistration) { %><p class="auth-alt">New to TERAPLAYZ? <a href="/register">Create a free account</a></p><% } %>
+  </div>
+</div>
+<%- include('partials/foot') %>

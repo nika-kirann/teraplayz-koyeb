@@ -1,0 +1,81 @@
+<%- include('partials/head') %>
+<% var hero = featured[0]; %>
+<% if (hero) { %>
+<section class="hero" aria-label="Featured">
+  <div class="hero-slides" data-hero>
+    <% featured.forEach(function (f, i) { var locked = f.is_premium && !(user && (user.isPremium || user.isAdmin)); %>
+    <article class="hero-slide<%= i === 0 ? ' is-active' : '' %>" data-index="<%= i %>" <%= i === 0 ? '' : 'aria-hidden=true' %>>
+      <div class="hero-bg"><img src="<%= f.thumb %>" alt="" <%= i === 0 ? 'fetchpriority=high' : 'loading=lazy' %> decoding="async"></div>
+      <div class="hero-content">
+        <p class="eyebrow"><span class="dot"></span><%= f.is_featured ? 'Featured' : 'New on TERAPLAYZ' %><% if (f.category_name) { %> · <%= f.category_name %><% } %></p>
+        <h1 class="hero-title"><%= f.title %></h1>
+        <p class="hero-meta">
+          <% if (f.is_premium) { %><span class="tag tag-premium">Premium</span><% } %>
+          <% if (f.isHD) { %><span class="tag tag-hd">HD</span><% } %>
+          <% if (f.duration) { %><span><%= h.formatDuration(f.duration) %></span><% } %>
+          <span><%= h.formatDate(f.date) %></span>
+        </p>
+        <p class="hero-desc"><%= f.description.length > 220 ? f.description.slice(0, 217) + '…' : f.description %></p>
+        <div class="hero-cta">
+          <a class="btn btn-glow btn-lg" href="/watch/<%= f.slug %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><%= locked ? 'Preview' : 'Watch now' %></a>
+          <% if (locked) { %><a class="btn btn-ghost btn-lg" href="/premium">Unlock with Premium</a><% } else { %><a class="btn btn-ghost btn-lg" href="/browse<%= f.category_slug ? '?category=' + f.category_slug : '' %>">More like this</a><% } %>
+        </div>
+      </div>
+    </article>
+    <% }) %>
+  </div>
+  <% if (featured.length > 1) { %>
+  <div class="hero-dots" role="tablist" aria-label="Featured videos">
+    <% featured.forEach(function (f, i) { %><button type="button" role="tab" aria-label="Show <%= f.title %>" aria-selected="<%= i === 0 %>" data-go="<%= i %>"></button><% }) %>
+  </div>
+  <% } %>
+</section>
+<% } else { %>
+<section class="hero hero-empty">
+  <div class="hero-content">
+    <p class="eyebrow"><span class="dot"></span>Welcome</p>
+    <h1 class="hero-title">TERAPLAYZ is warming up</h1>
+    <p class="hero-desc">No videos have been published yet. <% if (user && user.isAdmin) { %>Add your first video from the <a href="/admin/videos/new">admin dashboard</a>.<% } else { %>Check back soon!<% } %></p>
+  </div>
+</section>
+<% } %>
+
+<div class="container home-rows">
+  <nav class="chips" aria-label="Categories">
+    <a class="chip active" href="/browse">All</a>
+    <% categories.forEach(function (c) { %><a class="chip" href="/category/<%= c.slug %>"><%= c.name %><% if (Number(c.video_count)) { %> <small><%= c.video_count %></small><% } %></a><% }) %>
+  </nav>
+
+  <%- include('partials/ad-slot', { slot: 'home_top' }) %>
+
+  <% if (continueWatching.length) { %>
+    <%- include('partials/row', { id: 'continue', heading: 'Continue watching', icon: '', items: continueWatching, link: '/account' }) %>
+  <% } %>
+
+  <% if (trending.length) { %>
+    <%- include('partials/row', { id: 'trending', heading: 'Trending now', icon: '<span class="row-ico">🔥</span>', items: trending, link: '/browse?sort=popular', ranked: true }) %>
+  <% } %>
+
+  <%- include('partials/ad-slot', { slot: 'home_mid' }) %>
+
+  <% if (latest.length) { %>
+    <%- include('partials/row', { id: 'latest', heading: 'Latest releases', icon: '', items: latest, link: '/browse?sort=latest' }) %>
+  <% } %>
+
+  <% rows.forEach(function (r) { %>
+    <%- include('partials/row', { id: 'cat-' + r.category.slug, heading: r.category.name, icon: '', items: r.items, link: '/category/' + r.category.slug }) %>
+  <% }) %>
+
+  <% if (!(user && user.isPremium)) { %>
+  <section class="promo">
+    <div class="promo-glow" aria-hidden="true"></div>
+    <div>
+      <p class="eyebrow"><span class="dot"></span>TERAPLAYZ Premium</p>
+      <h2>Zero ads. Exclusive films. <span class="grad">One tap in Telegram.</span></h2>
+      <p class="muted">Unlock the premium catalogue, get the Premium badge and stream ad-free for <%= cfg.periodDays %> days — just <%= cfg.priceStars %> Telegram Stars.</p>
+    </div>
+    <a class="btn btn-glow btn-lg" href="/premium">Get Premium · <%= cfg.priceStars %> ⭐</a>
+  </section>
+  <% } %>
+</div>
+<%- include('partials/foot') %>

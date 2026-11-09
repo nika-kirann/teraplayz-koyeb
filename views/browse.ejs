@@ -1,0 +1,59 @@
+<%- include('partials/head') %>
+<div class="container page">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow"><span class="dot"></span><%= q ? 'Search' : category ? 'Category' : 'Library' %></p>
+      <h1><%= heading %></h1>
+      <p class="muted"><%= result.total %> video<%= result.total === 1 ? '' : 's' %><% if (category && category.description) { %> · <%= category.description %><% } %></p>
+    </div>
+    <form class="filters" method="get" action="/browse">
+      <label class="field-inline"><span class="sr-only">Search</span>
+        <input type="search" name="q" value="<%= q %>" placeholder="Search title or description" maxlength="80">
+      </label>
+      <label class="field-inline"><span class="sr-only">Category</span>
+        <select name="category">
+          <option value="">All categories</option>
+          <% categories.forEach(function (c) { %><option value="<%= c.slug %>" <%= category && category.id === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %>
+        </select>
+      </label>
+      <label class="field-inline"><span class="sr-only">Sort</span>
+        <select name="sort">
+          <option value="latest" <%= sort === 'latest' ? 'selected' : '' %>>Latest</option>
+          <option value="popular" <%= sort === 'popular' ? 'selected' : '' %>>Most viewed</option>
+          <option value="title" <%= sort === 'title' ? 'selected' : '' %>>A–Z</option>
+          <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest</option>
+        </select>
+      </label>
+      <% if (premiumOnly) { %><input type="hidden" name="premium" value="1"><% } %>
+      <button class="btn btn-glow" type="submit">Apply</button>
+    </form>
+  </header>
+
+  <nav class="chips" aria-label="Categories">
+    <a class="chip<%= !category ? ' active' : '' %>" href="/browse<%= q ? '?q=' + encodeURIComponent(q) : '' %>">All</a>
+    <% categories.forEach(function (c) { %>
+      <a class="chip<%= category && category.id === c.id ? ' active' : '' %>" href="/browse?category=<%= c.slug %><%= q ? '&q=' + encodeURIComponent(q) : '' %><%= sort !== 'latest' ? '&sort=' + sort : '' %>"><%= c.name %></a>
+    <% }) %>
+  </nav>
+
+  <%- include('partials/ad-slot', { slot: 'browse_top' }) %>
+
+  <% if (result.items.length) { %>
+    <div class="grid" id="grid" data-page="<%= result.page %>" data-pages="<%= result.pages %>">
+      <%- include('partials/card-grid-items', { items: result.items }) %>
+    </div>
+    <div class="load-more-wrap">
+      <% if (result.page < result.pages) { %><button class="btn btn-ghost" type="button" id="load-more">Load more</button><% } %>
+    </div>
+    <% var base = {}; Object.keys(query).forEach(function (k) { if (k !== 'page' && k !== 'partial' && typeof query[k] === 'string') base[k] = query[k]; }); %>
+    <%- include('partials/pagination', { page: result.page, pages: result.pages, base: base }) %>
+  <% } else { %>
+    <div class="empty">
+      <div class="empty-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+      <h2>Nothing here yet</h2>
+      <p class="muted"><%= q ? 'No videos match “' + q + '”. Try a different word or browse all categories.' : 'This category has no published videos yet.' %></p>
+      <a class="btn btn-ghost" href="/browse">Browse everything</a>
+    </div>
+  <% } %>
+</div>
+<%- include('partials/foot') %>

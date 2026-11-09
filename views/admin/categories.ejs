@@ -1,0 +1,39 @@
+<%- include('../partials/admin-top') %>
+<header class="admin-head"><div><h1>Categories</h1><p class="muted">Shown in navigation, filters and home rows (by sort order).</p></div></header>
+<section class="panel">
+  <h2>Add category</h2>
+  <form class="form inline-form" method="post" action="/admin/categories">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label class="field"><span>Name</span><input name="name" required maxlength="60"></label>
+    <label class="field"><span>Slug (optional)</span><input name="slug" maxlength="60" pattern="[a-z0-9-]{2,60}"></label>
+    <label class="field"><span>Description</span><input name="description" maxlength="300"></label>
+    <label class="field small-field"><span>Order</span><input name="sort_order" inputmode="numeric" value="0"></label>
+    <button class="btn btn-glow">Add</button>
+  </form>
+</section>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Name</th><th>Slug</th><th>Description</th><th>Order</th><th>Videos</th><th class="right">Actions</th></tr></thead>
+  <tbody>
+  <% items.forEach(function (c) { %>
+    <tr>
+      <td colspan="4">
+        <form class="inline-form row-form" method="post" action="/admin/categories/<%= c.id %>" id="cat-<%= c.id %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input name="name" value="<%= c.name %>" aria-label="Name" required maxlength="60">
+          <input name="slug" value="<%= c.slug %>" aria-label="Slug" maxlength="60">
+          <input name="description" value="<%= c.description || '' %>" aria-label="Description" maxlength="300">
+          <input name="sort_order" value="<%= c.sort_order %>" aria-label="Order" class="w-num">
+        </form>
+      </td>
+      <td><a href="/category/<%= c.slug %>"><%= c.video_count %></a></td>
+      <td class="right actions">
+        <button class="btn btn-ghost btn-xs" form="cat-<%= c.id %>">Save</button>
+        <form method="post" action="/admin/categories/<%= c.id %>/delete" data-confirm="Delete category “<%= c.name %>”? Its videos become uncategorised."><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-danger btn-xs">Delete</button></form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<%- include('../partials/admin-bottom') %>

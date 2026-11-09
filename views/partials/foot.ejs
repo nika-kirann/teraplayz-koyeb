@@ -1,0 +1,19 @@
+</main>
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <%- include('logo', { lid: 'f' }) %>
+      <p>Premium streaming for open, family-friendly cinema. Videos are delivered from our private library; this site never stores video files.</p>
+    </div>
+    <div class="footer-cols">
+      <div><h4>Watch</h4><a href="/browse">Browse all</a><a href="/browse?sort=popular">Popular</a><a href="/browse?premium=1">Premium catalogue</a></div>
+      <div><h4>Account</h4><a href="/account">My account</a><a href="/premium">Premium — <%= cfg.priceStars %> ⭐/mo</a><% if (!user) { %><a href="/register">Join free</a><% } %></div>
+      <div><h4>Credits</h4><p class="muted small">Demo films © Blender Foundation (CC BY) and CC0 sample footage.</p></div>
+    </div>
+  </div>
+  <div class="footer-bottom">© <%= new Date().getUTCFullYear() %> TERAPLAYZ. All rights reserved.<% if (cfg.demoMode) { %> <span class="pill pill-warn">Demo mode</span><% } %></div>
+</footer>
+<script src="/js/app.js?v=1" defer></script>
+<% if (typeof scripts !== 'undefined') { scripts.forEach(function (s) { %><script src="<%= s %>?v=1" defer></script><% }) } %>
+</body>
+</html>

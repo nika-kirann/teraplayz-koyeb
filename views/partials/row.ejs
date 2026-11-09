@@ -1,0 +1,15 @@
+<section class="row" aria-labelledby="row-<%= id %>">
+  <div class="row-head">
+    <h2 id="row-<%= id %>"><%- icon || '' %><%= heading %></h2>
+    <div class="row-tools">
+      <% if (typeof link !== 'undefined' && link) { %><a class="row-more" href="<%= link %>">See all <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><% } %>
+      <button class="row-nav prev" type="button" aria-label="Scroll left" data-dir="-1"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="row-nav next" type="button" aria-label="Scroll right" data-dir="1"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+  </div>
+  <div class="row-track<%= typeof ranked !== 'undefined' && ranked ? ' ranked' : '' %>">
+    <% items.forEach(function (v, i) { %>
+      <div class="row-item"><% if (typeof ranked !== 'undefined' && ranked) { %><span class="rank" aria-hidden="true"><%= i + 1 %></span><% } %><%- include('card', { v: v }) %></div>
+    <% }) %>
+  </div>
+</section>

@@ -1,0 +1,39 @@
+<%- include('../partials/admin-top') %>
+<header class="admin-head"><div><h1>Telegram</h1><p class="muted">Video library and Stars payments run through the official Bot API.</p></div></header>
+<% if (!cfg.telegramEnabled) { %>
+  <div class="alert alert-warn"><strong>Demo mode.</strong> Set <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_CHANNEL_ID</code>, <code>TELEGRAM_WEBHOOK_SECRET</code> and <code>PUBLIC_BASE_URL</code>, then restart. See README → Telegram setup.</div>
+<% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<div class="admin-cols">
+  <section class="panel">
+    <h2>Bot</h2>
+    <ul class="list">
+      <li><span>Bot token</span><span><%= cfg.telegramEnabled ? 'configured (hidden)' : 'missing' %></span></li>
+      <li><span>Bot</span><span><%= me ? '@' + me.username : '—' %></span></li>
+      <li><span>Private channel id</span><span><%= channelConfigured ? 'configured (hidden)' : 'missing' %></span></li>
+      <li><span>Webhook secret</span><span><%= secretConfigured ? 'configured (hidden)' : 'missing' %></span></li>
+      <li><span>Bot API server</span><span><%= apiRootCustom ? 'self-hosted' : 'api.telegram.org (cloud)' %></span></li>
+      <li><span>Max playable file</span><span><%= maxMb %> MB</span></li>
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Webhook</h2>
+    <% if (hook) { %>
+      <ul class="list">
+        <li><span>URL</span><span><%= hook.url || 'not set' %></span></li>
+        <li><span>Pending updates</span><span><%= hook.pending_update_count %></span></li>
+        <% if (hook.last_error_message) { %><li><span>Last error</span><span><%= hook.last_error_message %></span></li><% } %>
+      </ul>
+    <% } else { %><p class="muted">Unavailable.</p><% } %>
+    <form method="post" action="/admin/telegram/webhook"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-glow btn-sm" <%= cfg.telegramEnabled ? '' : 'disabled' %>>Register webhook → <%= publicBase || 'PUBLIC_BASE_URL' %>/telegram/webhook</button></form>
+  </section>
+</div>
+<section class="panel">
+  <h2>Adding videos</h2>
+  <ol class="steps">
+    <li>Post a video (≤ <%= maxMb %> MB for the cloud Bot API) to your private channel. With the webhook active it appears in <a href="/admin/videos?status=draft">Drafts</a> automatically.</li>
+    <li>Or send/forward a video to the bot from your linked admin Telegram account.</li>
+    <li>Or click <em>Add video</em> and use <em>Retrieve from Telegram</em> with the channel message id.</li>
+  </ol>
+</section>
+<%- include('../partials/admin-bottom') %>

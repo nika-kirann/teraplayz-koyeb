@@ -1,0 +1,11 @@
+<%- include('head', { admin: true, bodyClass: 'page-admin' }) %>
+<div class="admin">
+  <aside class="admin-side" aria-label="Admin navigation">
+    <p class="admin-side-h">Admin</p>
+    <% var items = [['/', 'Dashboard', 'M3 13h8V3H3zm0 8h8v-6H3zm10 0h8V11h-8zm0-18v6h8V3z'], ['/videos', 'Videos', 'M4 5h12v14H4zM16 10l5-3v10l-5-3z'], ['/categories', 'Categories', 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z'], ['/members', 'Members', 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 8a8 8 0 0 1 16 0z'], ['/payments', 'Payments', 'M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z'], ['/ads', 'Ad placements', 'M3 5h18v10H3zM7 19h10'], ['/telegram', 'Telegram', 'M21 4L3 11l6 2 2 6 3-4 5 4z']]; %>
+    <% items.forEach(function (it) { var active = it[0] === '/' ? adminNav === '/' : adminNav.indexOf(it[0]) === 0; %>
+      <a href="/admin<%= it[0] === '/' ? '' : it[0] %>" class="<%= active ? 'active' : '' %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="<%= it[2] %>"/></svg><%= it[1] %></a>
+    <% }) %>
+    <a href="/" class="admin-back">← View site</a>
+  </aside>
+  <div class="admin-main">

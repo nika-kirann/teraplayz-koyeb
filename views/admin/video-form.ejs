@@ -1,0 +1,90 @@
+<%- include('../partials/admin-top') %>
+<% var e = errors || {}; var isEdit = Boolean(video.id); var src = video.source_type || 'telegram'; %>
+<header class="admin-head">
+  <div><h1><%= isEdit ? 'Edit video' : 'Add video' %></h1><p class="muted"><%= isEdit ? '/watch/' + video.slug : 'Store metadata here; the file lives in your private Telegram channel.' %></p></div>
+  <% if (isEdit) { %><div class="admin-head-actions">
+    <a class="btn btn-ghost btn-sm" href="/watch/<%= video.slug %>">Preview</a>
+    <form method="post" action="/admin/videos/<%= video.id %>/<%= video.is_published ? 'unpublish' : 'publish' %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-sm <%= video.is_published ? 'btn-ghost' : 'btn-glow' %>"><%= video.is_published ? 'Unpublish' : 'Publish' %></button></form>
+  </div><% } %>
+</header>
+<% if (Object.keys(e).length) { %><div class="alert alert-error" role="alert">Please fix the highlighted fields.<% Object.keys(e).forEach(function (k) { %><br>• <%= e[k] %><% }) %></div><% } %>
+<form class="form admin-form" method="post" action="/admin/videos<%= isEdit ? '/' + video.id : '' %>" enctype="multipart/form-data" novalidate id="video-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="admin-form-grid">
+    <div class="col">
+      <section class="panel">
+        <h2>Details</h2>
+        <label class="field<%= e.title ? ' has-error' : '' %>"><span>Title *</span><input name="title" required maxlength="200" value="<%= video.title || '' %>"></label>
+        <label class="field"><span>Description</span><textarea name="description" rows="6" maxlength="5000"><%= video.description || '' %></textarea></label>
+        <label class="field<%= e.category_id ? ' has-error' : '' %>"><span>Category</span>
+          <select name="category_id"><option value="">— Uncategorised —</option>
+            <% categories.forEach(function (c) { %><option value="<%= c.id %>" <%= Number(video.category_id) === Number(c.id) ? 'selected' : '' %>><%= c.name %></option><% }) %>
+          </select></label>
+      </section>
+
+      <section class="panel">
+        <h2>Video source</h2>
+        <div class="seg" role="radiogroup" aria-label="Source type">
+          <label><input type="radio" name="source_type" value="telegram" <%= src === 'telegram' ? 'checked' : '' %>><span>Telegram channel</span></label>
+          <label><input type="radio" name="source_type" value="url" <%= src === 'url' ? 'checked' : '' %>><span>Public sample URL</span></label>
+        </div>
+        <div data-source="telegram" <%= src === 'telegram' ? '' : 'hidden' %>>
+          <p class="muted small">Post the video in your private channel, then enter its message id (the number at the end of the post link <code>t.me/c/…/<b>123</b></code>). TERAPLAYZ fetches file id, size, duration and thumbnail automatically. Files over <strong><%= maxMb %> MB</strong> cannot be served through the cloud Bot API.</p>
+          <div class="field-row">
+            <label class="field<%= e.telegram_message_id ? ' has-error' : '' %>"><span>Channel message ID</span><input name="telegram_message_id" inputmode="numeric" value="<%= video.telegram_message_id || '' %>" id="tg-mid"></label>
+            <button type="button" class="btn btn-ghost" id="tg-lookup" <%= channelConfigured ? '' : 'disabled title="Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID"' %>>Retrieve from Telegram</button>
+          </div>
+          <p class="small" id="tg-lookup-status" role="status"><% if (!channelConfigured) { %><span class="muted">Telegram not configured — enter the file id manually or switch to a public URL.</span><% } %></p>
+          <label class="field<%= e.telegram_file_id ? ' has-error' : '' %>"><span>Telegram file_id</span><input name="telegram_file_id" value="<%= video.telegram_file_id || '' %>" autocomplete="off" spellcheck="false"></label>
+          <div class="field-row">
+            <label class="field<%= e.telegram_file_unique_id ? ' has-error' : '' %>"><span>file_unique_id</span><input name="telegram_file_unique_id" value="<%= video.telegram_file_unique_id || '' %>" autocomplete="off" spellcheck="false"></label>
+            <label class="field<%= e.telegram_thumb_file_id ? ' has-error' : '' %>"><span>Thumbnail file_id</span><input name="telegram_thumb_file_id" value="<%= video.telegram_thumb_file_id || '' %>" autocomplete="off" spellcheck="false"></label>
+          </div>
+          <% if (isEdit && video.telegram_message_id) { %>
+            <button type="submit" class="btn btn-ghost btn-sm" form="refresh-form">Refresh metadata from Telegram</button>
+          <% } %>
+        </div>
+        <div data-source="url" <%= src === 'url' ? '' : 'hidden' %>>
+          <p class="muted small">For public-domain / Creative Commons sample files only (e.g. Blender open movies). Must be an <code>https://</code> progressive MP4 or WebM. It is proxied through <code>/stream</code> so access rules still apply.</p>
+          <label class="field<%= e.source_url ? ' has-error' : '' %>"><span>Public video URL</span><input name="source_url" type="url" value="<%= video.source_url || '' %>" placeholder="https://…/film.mp4"></label>
+        </div>
+        <div class="field-row four">
+          <label class="field"><span>MIME</span><input name="mime_type" value="<%= video.mime_type || '' %>" placeholder="video/mp4"></label>
+          <label class="field<%= e.file_size ? ' has-error' : '' %>"><span>Size (bytes)</span><input name="file_size" inputmode="numeric" value="<%= video.file_size || '' %>"></label>
+          <label class="field<%= e.duration ? ' has-error' : '' %>"><span>Duration (s)</span><input name="duration" inputmode="numeric" value="<%= video.duration || '' %>"></label>
+          <label class="field<%= e.width ? ' has-error' : '' %>"><span>Width</span><input name="width" inputmode="numeric" value="<%= video.width || '' %>"></label>
+          <label class="field<%= e.height ? ' has-error' : '' %>"><span>Height</span><input name="height" inputmode="numeric" value="<%= video.height || '' %>"></label>
+        </div>
+      </section>
+    </div>
+    <div class="col">
+      <section class="panel">
+        <h2>Visibility</h2>
+        <label class="switch"><input type="checkbox" name="is_published" value="1" <%= video.is_published ? 'checked' : '' %>><span></span>Published <small class="muted">— visible on the public site</small></label>
+        <label class="switch"><input type="checkbox" name="is_premium" value="1" <%= video.is_premium ? 'checked' : '' %>><span></span>Premium-only <small class="muted">— playable by Premium members</small></label>
+        <label class="switch"><input type="checkbox" name="is_featured" value="1" <%= video.is_featured ? 'checked' : '' %>><span></span>Featured <small class="muted">— eligible for the home hero</small></label>
+        <label class="switch"><input type="checkbox" name="download_allowed" value="1" <%= video.download_allowed ? 'checked' : '' %>><span></span>Allow downloads <small class="muted">— signed-in viewers with access</small></label>
+      </section>
+      <section class="panel">
+        <h2>Thumbnail</h2>
+        <div class="thumb-preview"><img src="<%= video.thumb || '/img/placeholder.svg' %>" alt="Current thumbnail" id="thumb-preview" width="640" height="360"></div>
+        <label class="field<%= e.thumbnail ? ' has-error' : '' %>"><span>Upload image</span><input type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" id="thumb-file"><small>Compressed to 640×360 WebP automatically.</small></label>
+        <label class="field<%= e.thumbnail_url ? ' has-error' : '' %>"><span>…or image URL</span><input name="thumbnail_url" value="<%= video.thumbnail_url || '' %>" placeholder="https://… or /img/…"></label>
+        <% if (video.thumbnail_path) { %><label class="switch"><input type="checkbox" name="remove_thumbnail" value="1"><span></span>Remove uploaded image</label><% } %>
+        <p class="muted small">Priority: uploaded image → image URL → Telegram thumbnail.</p>
+      </section>
+      <div class="form-actions">
+        <button class="btn btn-glow" type="submit"><%= isEdit ? 'Save changes' : 'Create video' %></button>
+        <a class="btn btn-ghost" href="/admin/videos">Cancel</a>
+      </div>
+    </div>
+  </div>
+</form>
+<% if (isEdit) { %>
+  <form id="refresh-form" method="post" action="/admin/videos/<%= video.id %>/refresh-telegram"><input type="hidden" name="_csrf" value="<%= csrfToken %>"></form>
+  <section class="panel danger-zone">
+    <h2>Danger zone</h2>
+    <form method="post" action="/admin/videos/<%= video.id %>/delete" data-confirm="Delete this video? The Telegram file is not touched."><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-danger btn-sm">Delete video</button></form>
+  </section>
+<% } %>
+<%- include('../partials/admin-bottom') %>

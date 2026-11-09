@@ -1,0 +1,95 @@
+<%- include('partials/head', { bodyClass: 'page-premium' }) %>
+<div class="container page">
+  <section class="premium-hero">
+    <div class="promo-glow" aria-hidden="true"></div>
+    <p class="eyebrow"><span class="dot"></span>TERAPLAYZ Premium</p>
+    <h1>Stream without limits.<br><span class="grad">Pay with Telegram Stars.</span></h1>
+    <p class="muted lead"><%= cfg.priceStars %> ⭐ for <%= cfg.periodDays %> days. No card, no ads, no hassle.</p>
+  </section>
+
+  <div class="premium-grid">
+    <section class="plan">
+      <h2>Free</h2>
+      <p class="plan-price">0 <small>forever</small></p>
+      <ul class="ticks">
+        <li>Full free catalogue</li><li>HD playback where available</li><li>Resume on every device</li><li class="no">Ads between rows &amp; beside the player</li><li class="no">Premium-only titles</li>
+      </ul>
+    </section>
+    <section class="plan plan-hot">
+      <span class="plan-flag">Best experience</span>
+      <h2>Premium</h2>
+      <p class="plan-price"><%= cfg.priceStars %> ⭐ <small>/ <%= cfg.periodDays %> days</small></p>
+      <ul class="ticks">
+        <li>Everything in Free</li><li><strong>Ad-free</strong> browsing &amp; watching</li><li><strong><%= premiumCount %></strong> premium-only title<%= premiumCount === 1 ? '' : 's' %></li><li>Premium badge on your profile</li><li>Renew any time — time stacks up</li>
+      </ul>
+
+      <div class="plan-action">
+      <% if (!user) { %>
+        <a class="btn btn-glow btn-block" href="/login?next=/premium">Sign in to upgrade</a>
+        <p class="muted small">No account? <a href="/register">Create one free</a>.</p>
+      <% } else if (!cfg.telegramEnabled) { %>
+        <button class="btn btn-glow btn-block" type="button" disabled aria-disabled="true">Go Premium — <%= cfg.priceStars %> Stars/month</button>
+        <p class="muted small">Payments are disabled: this server is running in <strong>demo mode</strong> (no Telegram bot configured). An admin can still grant Premium from the dashboard.</p>
+      <% } else if (!user.telegram_id) { %>
+        <% if (linkUrl) { %>
+          <ol class="steps">
+            <li><a class="btn btn-glow btn-block" href="<%= linkUrl %>" target="_blank" rel="noopener">Open @<%= botUsername %> in Telegram</a></li>
+            <li>Press <strong>Start</strong> in the bot. It confirms the link.</li>
+            <li><a href="/premium">Refresh this page</a> to continue to payment.</li>
+          </ol>
+          <p class="muted small">This one-time link expires in 30 minutes.</p>
+        <% } else { %>
+          <form method="post" action="/premium/link"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-glow btn-block" type="submit">Step 1 · Link Telegram</button></form>
+          <p class="muted small">We link your Telegram account so Stars payments are credited to <strong><%= user.username %></strong>.</p>
+        <% } %>
+      <% } else { %>
+        <% if (invoiceUrl || typeof invoiceSent !== 'undefined') { %>
+          <div class="alert alert-ok" id="invoice-box" data-poll="1" data-start="<%= user.premium_until || 0 %>">
+            <% if (invoiceUrl) { %><a class="btn btn-glow btn-block" href="<%= invoiceUrl %>" target="_blank" rel="noopener">Pay <%= cfg.priceStars %> ⭐ in Telegram</a><% } %>
+            <p class="small"><%= typeof invoiceSent !== 'undefined' && invoiceSent ? 'We also sent the invoice to your chat with @' + botUsername + '.' : '' %> Your Premium activates automatically as soon as Telegram confirms the payment to our server. <span data-poll-status>Waiting for confirmation…</span></p>
+          </div>
+        <% } else { %>
+          <form method="post" action="/premium/checkout"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-glow btn-block" type="submit"><%= user.isPremium ? 'Renew — +' + cfg.periodDays + ' days for ' + cfg.priceStars + ' ⭐' : 'Go Premium — ' + cfg.priceStars + ' Stars/month' %></button></form>
+        <% } %>
+        <div class="muted small linked-row">Linked Telegram: <%= user.telegram_username ? '@' + user.telegram_username : 'ID ' + user.telegram_id %> ·
+          <form class="inline" method="post" action="/premium/unlink"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="linklike" type="submit">Unlink</button></form></div>
+      <% } %>
+      </div>
+    </section>
+  </div>
+
+  <% if (user) { %>
+  <section class="panel">
+    <h2>Your membership</h2>
+    <% if (user.isPremium) { %>
+      <p><span class="badge-premium static">Premium</span> active until <strong><%= h.formatDate(user.premium_until) %></strong> (<%= Math.ceil((Number(user.premium_until) - Date.now()) / 864e5) %> days left).</p>
+      <% if (user.premium_auto_renew) { %>
+        <p class="muted small">Telegram Stars invoices are one-off, so nothing is charged automatically — we'll remind you to renew near the expiry date. Cancel to stop reminders; your paid time is always kept.</p>
+        <form method="post" action="/premium/cancel"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-sm" type="submit">Cancel renewal</button></form>
+      <% } else { %>
+        <p class="muted small">Renewal is cancelled. Premium ends on <%= h.formatDate(user.premium_until) %>.</p>
+        <form method="post" action="/premium/resume"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-sm" type="submit">Resume renewal reminders</button></form>
+      <% } %>
+    <% } else if (user.premium_until) { %>
+      <p>Your Premium expired on <strong><%= h.formatDate(user.premium_until) %></strong>. Renew above to unlock everything again.</p>
+    <% } else { %>
+      <p class="muted">You're on the free plan.</p>
+    <% } %>
+    <% if (payments.length) { %>
+      <h3>Payments</h3>
+      <ul class="list"><% payments.forEach(function (p) { %><li><span><%= p.amount %> ⭐</span><span class="muted"><%= h.formatDate(p.created_at) %> · covers until <%= h.formatDate(p.period_end) %></span></li><% }) %></ul>
+    <% } %>
+  </section>
+  <% } %>
+
+  <section class="faq">
+    <h2>How it works</h2>
+    <details><summary>What are Telegram Stars?</summary><p>Stars are Telegram's in-app currency for digital goods. You buy them inside Telegram (Apple/Google/Fragment) and spend them in bots like ours.</p></details>
+    <details><summary>Why link my Telegram account?</summary><p>Payments happen inside Telegram. Linking tells our server which TERAPLAYZ account to credit. We only store your Telegram numeric id and username.</p></details>
+    <details><summary>When does Premium start?</summary><p>Instantly after Telegram confirms the payment to our server. We never rely on the browser to say you've paid.</p></details>
+    <details><summary>How do renewals and cancellation work?</summary><p>Each payment adds <%= cfg.periodDays %> days on top of any remaining time. Nothing renews automatically; cancelling just stops reminders, and you keep Premium until it expires.</p></details>
+  </section>
+</div>
+<%- include('partials/foot', { scripts: ['/js/premium.js'] }) %>

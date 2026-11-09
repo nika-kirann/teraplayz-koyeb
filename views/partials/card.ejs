@@ -1,0 +1,25 @@
+<% var locked = v.is_premium && !(user && (user.isPremium || user.isAdmin)); %>
+<article class="card<%= locked ? ' is-locked' : '' %>">
+  <a href="/watch/<%= v.slug %>" class="card-link" aria-label="<%= v.title %><%= v.is_premium ? ' (Premium)' : '' %>">
+    <div class="card-thumb">
+      <img src="<%= v.thumb %>" alt="" loading="lazy" decoding="async" width="640" height="360">
+      <div class="card-shade"></div>
+      <div class="card-badges">
+        <% if (v.is_premium) { %><span class="tag tag-premium"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg>Premium</span><% } %>
+        <% if (v.isHD) { %><span class="tag tag-hd">HD</span><% } %>
+        <% if (typeof v.is_published !== 'undefined' && !v.is_published) { %><span class="tag tag-draft">Draft</span><% } %>
+      </div>
+      <% if (v.duration) { %><span class="card-dur"><%= h.formatDuration(v.duration) %></span><% } %>
+      <span class="card-play" aria-hidden="true"><% if (locked) { %><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg><% } else { %><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><% } %></span>
+      <% if (typeof v.position !== 'undefined' && v.pdur) { %><span class="card-progress"><i style="width:<%= Math.min(100, Math.round(v.position / v.pdur * 100)) %>%"></i></span><% } %>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title"><%= v.title %></h3>
+      <p class="card-meta">
+        <% if (v.category_name) { %><span><%= v.category_name %></span><i>•</i><% } %>
+        <time datetime="<%= new Date(Number(v.date)).toISOString() %>"><%= h.formatDate(v.date) %></time>
+        <i>•</i><span><%= h.formatCount(v.views) %> views</span>
+      </p>
+    </div>
+  </a>
+</article>

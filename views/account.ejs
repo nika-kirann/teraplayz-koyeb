@@ -1,0 +1,50 @@
+<%- include('partials/head') %>
+<div class="container page narrow">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow"><span class="dot"></span>Account</p>
+      <h1><span class="avatar avatar-lg"><%= user.username.slice(0,1).toUpperCase() %></span> <%= user.username %>
+        <% if (user.isPremium) { %><span class="badge-premium static"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg>Premium</span><% } %></h1>
+      <p class="muted">Member since <%= h.formatDate(user.created_at) %><% if (user.isAdmin) { %> · Administrator<% } %></p>
+    </div>
+  </header>
+  <div class="panel-grid">
+    <section class="panel">
+      <h2>Membership</h2>
+      <% if (user.isPremium) { %>
+        <p>Premium active until <strong><%= h.formatDate(user.premium_until) %></strong>.<% if (!user.premium_auto_renew) { %> Renewal cancelled.<% } %></p>
+      <% } else if (user.premium_until) { %>
+        <p>Your Premium expired on <strong><%= h.formatDate(user.premium_until) %></strong>.</p>
+      <% } else { %>
+        <p>You're on the free plan (with ads).</p>
+      <% } %>
+      <p>Telegram: <%= user.telegram_id ? (user.telegram_username ? '@' + user.telegram_username : 'linked') : 'not linked' %></p>
+      <a class="btn btn-glow btn-sm" href="/premium"><%= user.isPremium ? 'Manage Premium' : 'Go Premium' %></a>
+    </section>
+    <section class="panel">
+      <h2>Change password</h2>
+      <form method="post" action="/account/password" class="form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label class="field"><span>Current password</span><input type="password" name="current_password" autocomplete="current-password" required></label>
+        <label class="field"><span>New password</span><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+        <label class="field"><span>Confirm new password</span><input type="password" name="password_confirm" autocomplete="new-password" minlength="8" required></label>
+        <button class="btn btn-ghost btn-sm" type="submit">Update password</button>
+      </form>
+    </section>
+  </div>
+  <section class="panel">
+    <h2>Continue watching</h2>
+    <% if (progress.length) { %>
+      <ul class="list">
+        <% progress.forEach(function (p) { %><li><a href="/watch/<%= p.slug %>"><%= p.title %></a><span class="muted"><%= h.formatDuration(p.position) || '0:00' %><%= p.duration ? ' / ' + h.formatDuration(p.duration) : '' %> · <%= h.timeAgo(p.updated_at) %></span></li><% }) %>
+      </ul>
+    <% } else { %><p class="muted">Nothing yet — start a video and your progress will sync here.</p><% } %>
+  </section>
+  <section class="panel">
+    <h2>Payment history</h2>
+    <% if (payments.length) { %>
+      <ul class="list"><% payments.forEach(function (p) { %><li><span><%= p.amount %> ⭐ <%= p.currency %></span><span class="muted"><%= h.formatDate(p.created_at) %> → until <%= h.formatDate(p.period_end) %></span></li><% }) %></ul>
+    <% } else { %><p class="muted">No payments yet.</p><% } %>
+  </section>
+</div>
+<%- include('partials/foot') %>

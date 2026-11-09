@@ -1,0 +1,24 @@
+<%- include('partials/head', { bodyClass: 'page-auth' }) %>
+<div class="auth">
+  <div class="auth-card">
+    <%- include('partials/logo', { lid: 'a' }) %>
+    <h1>Create your account</h1>
+    <p class="muted">Free forever. Upgrade to Premium any time for <%= cfg.priceStars %> ⭐ a month.</p>
+    <% if (!cfg.allowRegistration) { %><div class="alert alert-warn">Registration is currently closed.</div><% } %>
+    <form method="post" action="/register" class="form" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="field<%= errors.username ? ' has-error' : '' %>"><span>Username</span>
+        <input name="username" autocomplete="username" required pattern="[A-Za-z0-9_]{3,24}" minlength="3" maxlength="24" value="<%= form.username || '' %>" aria-describedby="u-help" autofocus>
+        <small id="u-help"><%= errors.username || '3–24 letters, numbers or underscores.' %></small></label>
+      <label class="field<%= errors.password ? ' has-error' : '' %>"><span>Password</span>
+        <input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="128" aria-describedby="p-help">
+        <small id="p-help"><%= errors.password || 'At least 8 characters with a letter and a number.' %></small></label>
+      <label class="field<%= errors.password_confirm ? ' has-error' : '' %>"><span>Confirm password</span>
+        <input name="password_confirm" type="password" autocomplete="new-password" required maxlength="128">
+        <% if (errors.password_confirm) { %><small><%= errors.password_confirm %></small><% } %></label>
+      <button class="btn btn-glow btn-block" type="submit" <%= cfg.allowRegistration ? '' : 'disabled' %>>Create account</button>
+    </form>
+    <p class="auth-alt">Already have an account? <a href="/login">Sign in</a></p>
+  </div>
+</div>
+<%- include('partials/foot') %>

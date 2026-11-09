@@ -1,0 +1,41 @@
+<%- include('../partials/admin-top') %>
+<header class="admin-head"><div><h1>Members</h1><p class="muted"><%= total %> account(s). Premium status is computed live from the expiry date.</p></div></header>
+<form class="filters" method="get" action="/admin/members">
+  <input type="search" name="q" value="<%= q %>" placeholder="Username or Telegram id">
+  <select name="filter">
+    <option value="">All</option>
+    <option value="premium" <%= filter === 'premium' ? 'selected' : '' %>>Active premium</option>
+    <option value="expired" <%= filter === 'expired' ? 'selected' : '' %>>Expired premium</option>
+    <option value="admins" <%= filter === 'admins' ? 'selected' : '' %>>Admins</option>
+    <option value="banned" <%= filter === 'banned' ? 'selected' : '' %>>Suspended</option>
+  </select>
+  <button class="btn btn-ghost btn-sm">Filter</button>
+</form>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>User</th><th>Telegram</th><th>Premium</th><th>Joined</th><th class="right">Manage premium</th></tr></thead>
+  <tbody>
+  <% items.forEach(function (u) { var active = u.premium_until && Number(u.premium_until) > Date.now(); %>
+    <tr data-member="<%= u.username %>">
+      <td><strong><%= u.username %></strong> <% if (u.role === 'admin') { %><span class="pill">admin</span><% } %><% if (u.is_banned) { %><span class="pill pill-warn">suspended</span><% } %><br><small class="muted"><%= u.payments %> payment(s)<%= u.last_login_at ? ' · last login ' + h.timeAgo(u.last_login_at) : '' %></small></td>
+      <td><%= u.telegram_id ? (u.telegram_username ? '@' + u.telegram_username : u.telegram_id) : '—' %></td>
+      <td>
+        <% if (active) { %><span class="pill pill-premium">Active</span> until <%= h.formatDate(u.premium_until) %><%= u.premium_auto_renew ? '' : ' · cancelled' %>
+        <% } else if (u.premium_until) { %><span class="pill pill-muted">Expired</span> <%= h.formatDate(u.premium_until) %>
+        <% } else { %><span class="muted">Free</span><% } %>
+      </td>
+      <td><%= h.formatDate(u.created_at) %></td>
+      <td class="right actions">
+        <form class="inline-form" method="post" action="/admin/members/<%= u.id %>/grant"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input class="w-num" name="days" value="31" inputmode="numeric" aria-label="Days"><button class="btn btn-glow btn-xs">+ days</button></form>
+        <form class="inline-form" method="post" action="/admin/members/<%= u.id %>/expiry"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="date" name="until" value="<%= u.premium_until ? new Date(Number(u.premium_until)).toISOString().slice(0,10) : '' %>" aria-label="Expiry date"><button class="btn btn-ghost btn-xs">Set</button></form>
+        <% if (u.premium_until) { %><form method="post" action="/admin/members/<%= u.id %>/revoke" data-confirm="Revoke premium for <%= u.username %>?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-xs">Revoke</button></form><% } %>
+        <% if (Number(u.id) !== Number(user.id)) { %><form method="post" action="/admin/members/<%= u.id %>/ban" data-confirm="<%= u.is_banned ? 'Restore' : 'Suspend' %> <%= u.username %>?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-danger btn-xs"><%= u.is_banned ? 'Restore' : 'Suspend' %></button></form><% } %>
+      </td>
+    </tr>
+  <% }) %>
+  <% if (!items.length) { %><tr><td colspan="5" class="empty-cell">No members match.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+<%- include('../partials/pagination', { page: page, pages: pages, base: { q: q, filter: filter } }) %>
+<%- include('../partials/admin-bottom') %>

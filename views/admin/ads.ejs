@@ -1,0 +1,29 @@
+<%- include('../partials/admin-top') %>
+<header class="admin-head">
+  <div><h1>Ad placements</h1><p class="muted">Ads render only for guests and free users — never for Premium — and never on top of the player.</p></div>
+  <a class="btn btn-glow btn-sm" href="/admin/ads/new">+ New ad</a>
+</header>
+<div class="slot-legend">
+  <span class="pill">home_top</span> above home rows · <span class="pill">home_mid</span> between rows · <span class="pill">browse_top</span> above browse grid · <span class="pill">watch_below</span> under the player · <span class="pill">watch_sidebar</span> top of "Up next"
+</div>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Name</th><th>Slot</th><th>Type</th><th>Pages</th><th>Status</th><th class="right">Actions</th></tr></thead>
+  <tbody>
+  <% items.forEach(function (a) { %>
+    <tr>
+      <td><strong><%= a.name %></strong><br><small class="muted"><%= a.kind === 'image' ? (a.link_url || '') : 'HTML snippet (sandboxed iframe)' %></small></td>
+      <td><span class="pill"><%= a.slot %></span></td><td><%= a.kind %></td><td><%= a.pages %></td>
+      <td><span class="pill <%= a.enabled ? 'pill-ok' : 'pill-muted' %>"><%= a.enabled ? 'Enabled' : 'Disabled' %></span></td>
+      <td class="right actions">
+        <a class="btn btn-ghost btn-xs" href="/admin/ads/<%= a.id %>/edit">Edit</a>
+        <form method="post" action="/admin/ads/<%= a.id %>/toggle"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-xs"><%= a.enabled ? 'Disable' : 'Enable' %></button></form>
+        <form method="post" action="/admin/ads/<%= a.id %>/delete" data-confirm="Delete this ad?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-danger btn-xs">Delete</button></form>
+      </td>
+    </tr>
+  <% }) %>
+  <% if (!items.length) { %><tr><td colspan="6" class="empty-cell">No ads configured — free users see an ad-free site.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+<%- include('../partials/admin-bottom') %>
